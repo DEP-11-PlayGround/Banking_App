@@ -25,47 +25,49 @@ public class BankingApp {
     private static int accountIdCounter = 1;
 
     public static void main(String[] args) {
-        String[] mainOptions = {
-            CREATE_NEW_ACCOUNT,
-            DEPOSIT,
-            WITHDRAWALS,
-            TRANSFER,
-            CHECK_ACCOUNT_BALANCE,
-            DELETE_ACCOUNT,
-            EXIT
-        };
-
         String screen = DASHBOARD;
 
         do {
+            displayScreen(screen);
+
             switch (screen) {
                 case DASHBOARD:
-                    int option = handleDashboardOption(mainOptions);
-                    screen = handleOption(option, mainOptions);
+                    int option = getUserChoice(1, 7);
+                    screen = handleDashboardOption(option);
                     break;
 
                 case CREATE_NEW_ACCOUNT:
-                    screen = createNewAccount(mainOptions);
+                    screen = createNewAccount();
                     break;
 
                 case DEPOSIT:
-                    screen = deposit(mainOptions);
+                    System.out.print("\tEnter your account number: ");
+                    String depositAccountNumber = SCANNER.nextLine().strip();
+                    deposit(depositAccountNumber);
                     break;
 
                 case WITHDRAWALS:
-                    screen = withdrawal(mainOptions);
+                    System.out.print("\tEnter your account number: ");
+                    String withdrawalAccountNumber = SCANNER.nextLine().strip();
+                    withdrawal(withdrawalAccountNumber);
                     break;
 
                 case TRANSFER:
-                    screen = transfer(mainOptions);
+                    System.out.print("\tEnter your account number: ");
+                    String transferSourceAccountNumber = SCANNER.nextLine().strip();
+                    transfer(transferSourceAccountNumber);
                     break;
 
                 case CHECK_ACCOUNT_BALANCE:
-                    screen = checkAccountBalance(mainOptions);
+                    System.out.print("\tEnter your account number: ");
+                    String checkBalanceAccountNumber = SCANNER.nextLine().strip();
+                    checkAccountBalance(checkBalanceAccountNumber);
                     break;
 
                 case DELETE_ACCOUNT:
-                    screen = deleteAccount(mainOptions);
+                    System.out.print("\tEnter your account number to delete: ");
+                    String deleteAccountNumber = SCANNER.nextLine().strip();
+                    screen = deleteAccount(deleteAccountNumber);
                     break;
 
                 case EXIT:
@@ -80,14 +82,10 @@ public class BankingApp {
         } while (true);
     }
 
-    private static void displayScreen(String screenTitle, String[] options) {
+    private static void displayScreen(String screenTitle) {
         final String APP_TITLE = String.format("%s%s%s", COLOR_BLUE_BOLD, screenTitle, RESET);
         System.out.println(CLEAR);
         System.out.println("\t" + APP_TITLE + "\n");
-
-        for (int i = 0; i < options.length; i++) {
-            System.out.printf("\t%d. %s\n", i + 1, options[i]);
-        }
     }
 
     private static int getUserChoice(int min, int max) {
@@ -100,14 +98,254 @@ public class BankingApp {
         return option;
     }
 
-    private static int handleDashboardOption(String[] options) {
-        displayScreen(DASHBOARD, options);
-        return getUserChoice(1, options.length);
+    private static String handleDashboardOption(int option) {
+        switch (option) {
+            case 1:
+                return CREATE_NEW_ACCOUNT;
+            case 2:
+                return DEPOSIT;
+            case 3:
+                return WITHDRAWALS;
+            case 4:
+                return TRANSFER;
+            case 5:
+                return CHECK_ACCOUNT_BALANCE;
+            case 6:
+                return DELETE_ACCOUNT;
+            case 7:
+                System.out.println(CLEAR);
+                System.exit(0);
+        }
+        return DASHBOARD; // Default to the dashboard
     }
 
-    private static String handleOption(int option, String[] options) {
-        return options[option - 1];
+    private static String createNewAccount() {
+        String newAccountId = String.format("SDB-%05d", accountIdCounter);
+        String newName;
+        boolean valid;
+
+        do {
+            valid = true;
+            System.out.print("\tEnter A/C Name: ");
+            newName = SCANNER.nextLine().strip();
+            if (newName.isBlank()) {
+                System.out.printf(ERROR_MSG, "A/C name can't be empty");
+                valid = false;
+                continue;
+            }
+            for (int i = 0; i < newName.length(); i++) {
+                if (!(Character.isLetter(newName.charAt(i)) || Character.isSpaceChar(newName.charAt(i)))) {
+                    System.out.printf(ERROR_MSG, "Invalid A/C name");
+                    valid = false;
+                    break;
+                }
+            }
+        } while (!valid);
+
+        int initialDeposit;
+
+        do {
+            valid = true;
+            System.out.print("Enter your Deposited Amount Here: ");
+            initialDeposit = SCANNER.nextInt();
+            SCANNER.nextLine();
+
+            if (initialDeposit >= 5000) { // Changed from > to >=
+                System.out.println("Initial Deposit: " + initialDeposit);
+                System.out.println();
+            } else {
+                System.out.printf(ERROR_MSG, "Not Sufficient Amount In Your A/C");
+                valid = false;
+                continue;
+            }
+        } while (!valid);
+
+        String[] newAccount = {newAccountId, newName, String.valueOf(initialDeposit)};
+        String[][] newAccounts = new String[accounts.length + 1][3];
+        for (int i = 0; i < accounts.length; i++) {
+            newAccounts[i] = accounts[i];
+        }
+        newAccounts[newAccounts.length - 1] = newAccount;
+        accounts = newAccounts;
+
+        accountIdCounter++;
+
+        System.out.printf(SUCCESS_MSG, String.format("%s:%s has been saved successfully", newAccountId, newName));
+        System.out.print("\tDo you want to continue adding (Y/n)? ");
+        if (SCANNER.nextLine().strip().equalsIgnoreCase("Y")) {
+            return CREATE_NEW_ACCOUNT;
+        } else {
+            return DASHBOARD; // Return to the dashboard screen
+        }
     }
 
-    // Implement other methods for createNewAccount, deposit, withdrawal, transfer, checkAccountBalance, and deleteAccount here...
+    private static void deposit(String accountNumber) {
+        int amount;
+        boolean valid;
+
+        do {
+            valid = true;
+            System.out.print("\tEnter the amount to deposit: ");
+            amount = SCANNER.nextInt();
+            SCANNER.nextLine();
+
+            if (amount > 0) {
+                // Find the account by accountNumber and update the balance
+                for (String[] account : accounts) {
+                    if (account[0].equals(accountNumber)) {
+                        int currentBalance = Integer.parseInt(account[2]);
+                        int newBalance = currentBalance + amount;
+                        account[2] = String.valueOf(newBalance);
+                        System.out.printf(SUCCESS_MSG, String.format("%d has been deposited to %s. New balance: %d", amount, account[1], newBalance));
+                        return;
+                    }
+                }
+                System.out.printf(ERROR_MSG, "Account not found");
+            } else {
+                System.out.printf(ERROR_MSG, "Invalid amount");
+                valid = false;
+            }
+        } while (!valid);
+    }
+
+    private static void withdrawal(String accountNumber) {
+        int amount;
+        boolean valid;
+
+        do {
+            valid = true;
+            System.out.print("\tEnter the amount to withdraw: ");
+            amount = SCANNER.nextInt();
+            SCANNER.nextLine();
+
+            if (amount > 0) {
+                // Find the account by accountNumber and update the balance
+                for (String[] account : accounts) {
+                    if (account[0].equals(accountNumber)) {
+                        int currentBalance = Integer.parseInt(account[2]);
+                        if (currentBalance >= amount) {
+                            int newBalance = currentBalance - amount;
+                            account[2] = String.valueOf(newBalance);
+                            System.out.printf(SUCCESS_MSG, String.format("%d has been withdrawn from %s. New balance: %d", amount, account[1], newBalance));
+                            return;
+                        } else {
+                            System.out.printf(ERROR_MSG, "Insufficient balance");
+                            valid = false;
+                            break;
+                        }
+                    }
+                }
+                System.out.printf(ERROR_MSG, "Account not found");
+            } else {
+                System.out.printf(ERROR_MSG, "Invalid amount");
+                valid = false;
+            }
+        } while (!valid);
+    }
+
+    private static void transfer(String sourceAccountNumber) {
+        String targetAccountNumber;
+        int amount;
+        boolean valid;
+
+        do {
+            valid = true;
+            System.out.print("\tEnter the target account number: ");
+            targetAccountNumber = SCANNER.nextLine().strip();
+
+            if (targetAccountNumber.isEmpty() || !accountExists(targetAccountNumber)) {
+                System.out.printf(ERROR_MSG, "Invalid target account");
+                valid = false;
+                continue;
+            }
+
+            System.out.print("\tEnter the amount to transfer: ");
+            amount = SCANNER.nextInt();
+            SCANNER.nextLine();
+
+            if (amount <= 0) {
+                System.out.printf(ERROR_MSG, "Invalid amount");
+                valid = false;
+                continue;
+            }
+
+            // Find the source and target accounts and perform the transfer
+            String[] sourceAccount = null;
+            String[] targetAccount = null;
+            for (String[] account : accounts) {
+                if (account[0].equals(sourceAccountNumber)) {
+                    sourceAccount = account;
+                }
+                if (account[0].equals(targetAccountNumber)) {
+                    targetAccount = account;
+                }
+            }
+
+            if (sourceAccount != null && targetAccount != null) {
+                int sourceBalance = Integer.parseInt(sourceAccount[2]);
+                if (sourceBalance >= amount) {
+                    int targetBalance = Integer.parseInt(targetAccount[2]);
+                    sourceAccount[2] = String.valueOf(sourceBalance - amount);
+                    targetAccount[2] = String.valueOf(targetBalance + amount);
+                    System.out.printf(SUCCESS_MSG, String.format("%d has been transferred from %s to %s", amount, sourceAccount[1], targetAccount[1]));
+                    return;
+                } else {
+                    System.out.printf(ERROR_MSG, "Insufficient balance in the source account");
+                    valid = false;
+                }
+            } else {
+                System.out.printf(ERROR_MSG, "Source or target account not found");
+                valid = false;
+            }
+        } while (!valid);
+    }
+
+    private static void checkAccountBalance(String accountNumber) {
+        for (String[] account : accounts) {
+            if (account[0].equals(accountNumber)) {
+                int balance = Integer.parseInt(account[2]);
+                System.out.printf(SUCCESS_MSG, String.format("Account balance for %s: %d", account[1], balance));
+                return;
+            }
+        }
+        System.out.printf(ERROR_MSG, "Account not found");
+    }
+
+    private static String deleteAccount(String accountNumber) {
+        int indexToDelete = -1;
+
+        for (int i = 0; i < accounts.length; i++) {
+            if (accounts[i][0].equals(accountNumber)) {
+                indexToDelete = i;
+                break;
+            }
+        }
+
+        if (indexToDelete != -1) {
+            String deletedAccountName = accounts[indexToDelete][1];
+            // Create a new array to store the accounts without the deleted one
+            String[][] newAccounts = new String[accounts.length - 1][3];
+            int newIndex = 0;
+            for (int i = 0; i < accounts.length; i++) {
+                if (i != indexToDelete) {
+                    newAccounts[newIndex++] = accounts[i];
+                }
+            }
+            accounts = newAccounts;
+            System.out.printf(SUCCESS_MSG, String.format("%s has been deleted successfully", deletedAccountName));
+        } else {
+            System.out.printf(ERROR_MSG, "Account not found");
+        }
+
+        return DASHBOARD; // Return to the dashboard screen
+    }
+
+    private static boolean accountExists(String accountNumber) {
+        for (String[] account : accounts) {
+            if (account[0].equals(accountNumber)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
