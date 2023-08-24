@@ -25,61 +25,59 @@ public class BankingApp {
     private static int accountIdCounter = 1;
 
     public static void main(String[] args) {
-        String screen = DASHBOARD;
+        String screen = DASHBOARD; 
 
-        do {
-            displayScreen(screen);
+        while (true) {
+            
+            System.out.println("Choose an option:");
+            System.out.println("1. Create New Account");
+            System.out.println("2. Deposit");
+            System.out.println("3. Withdrawals");
+            System.out.println("4. Transfer");
+            System.out.println("5. Check Account Balance");
+            System.out.println("6. Delete Account");
+            System.out.println("7. Exit");
 
-            switch (screen) {
-                case DASHBOARD:
-                    int option = getUserChoice(1, 7);
-                    screen = handleDashboardOption(option);
-                    break;
+            int option = getUserChoice(1, 7);
 
-                case CREATE_NEW_ACCOUNT:
+            switch (option) {
+                case 1:
                     screen = createNewAccount();
                     break;
-
-                case DEPOSIT:
+                case 2:
                     System.out.print("\tEnter your account number: ");
                     String depositAccountNumber = SCANNER.nextLine().strip();
                     deposit(depositAccountNumber);
                     break;
-
-                case WITHDRAWALS:
+                case 3:
                     System.out.print("\tEnter your account number: ");
                     String withdrawalAccountNumber = SCANNER.nextLine().strip();
                     withdrawal(withdrawalAccountNumber);
                     break;
-
-                case TRANSFER:
+                case 4:
                     System.out.print("\tEnter your account number: ");
                     String transferSourceAccountNumber = SCANNER.nextLine().strip();
                     transfer(transferSourceAccountNumber);
                     break;
-
-                case CHECK_ACCOUNT_BALANCE:
+                case 5:
                     System.out.print("\tEnter your account number: ");
                     String checkBalanceAccountNumber = SCANNER.nextLine().strip();
                     checkAccountBalance(checkBalanceAccountNumber);
                     break;
-
-                case DELETE_ACCOUNT:
+                case 6:
                     System.out.print("\tEnter your account number to delete: ");
                     String deleteAccountNumber = SCANNER.nextLine().strip();
                     screen = deleteAccount(deleteAccountNumber);
                     break;
-
-                case EXIT:
+                case 7:
                     System.out.println(CLEAR);
                     System.exit(0);
                     break;
-
                 default:
                     System.out.println("Invalid option. Please try again.");
                     break;
             }
-        } while (true);
+        }
     }
 
     private static void displayScreen(String screenTitle) {
@@ -96,27 +94,6 @@ public class BankingApp {
             SCANNER.nextLine();
         } while (option < min || option > max);
         return option;
-    }
-
-    private static String handleDashboardOption(int option) {
-        switch (option) {
-            case 1:
-                return CREATE_NEW_ACCOUNT;
-            case 2:
-                return DEPOSIT;
-            case 3:
-                return WITHDRAWALS;
-            case 4:
-                return TRANSFER;
-            case 5:
-                return CHECK_ACCOUNT_BALANCE;
-            case 6:
-                return DELETE_ACCOUNT;
-            case 7:
-                System.out.println(CLEAR);
-                System.exit(0);
-        }
-        return DASHBOARD; // Default to the dashboard
     }
 
     private static String createNewAccount() {
@@ -150,7 +127,7 @@ public class BankingApp {
             initialDeposit = SCANNER.nextInt();
             SCANNER.nextLine();
 
-            if (initialDeposit >= 5000) { // Changed from > to >=
+            if (initialDeposit >= 5000) { 
                 System.out.println("Initial Deposit: " + initialDeposit);
                 System.out.println();
             } else {
@@ -175,7 +152,7 @@ public class BankingApp {
         if (SCANNER.nextLine().strip().equalsIgnoreCase("Y")) {
             return CREATE_NEW_ACCOUNT;
         } else {
-            return DASHBOARD; // Return to the dashboard screen
+            return DASHBOARD; 
         }
     }
 
@@ -190,7 +167,7 @@ public class BankingApp {
             SCANNER.nextLine();
 
             if (amount > 0) {
-                // Find the account by accountNumber and update the balance
+               
                 for (String[] account : accounts) {
                     if (account[0].equals(accountNumber)) {
                         int currentBalance = Integer.parseInt(account[2]);
@@ -219,7 +196,7 @@ public class BankingApp {
             SCANNER.nextLine();
 
             if (amount > 0) {
-                // Find the account by accountNumber and update the balance
+               
                 for (String[] account : accounts) {
                     if (account[0].equals(accountNumber)) {
                         int currentBalance = Integer.parseInt(account[2]);
@@ -269,7 +246,7 @@ public class BankingApp {
                 continue;
             }
 
-            // Find the source and target accounts and perform the transfer
+           
             String[] sourceAccount = null;
             String[] targetAccount = null;
             for (String[] account : accounts) {
@@ -323,7 +300,7 @@ public class BankingApp {
 
         if (indexToDelete != -1) {
             String deletedAccountName = accounts[indexToDelete][1];
-            // Create a new array to store the accounts without the deleted one
+           
             String[][] newAccounts = new String[accounts.length - 1][3];
             int newIndex = 0;
             for (int i = 0; i < accounts.length; i++) {
@@ -337,7 +314,7 @@ public class BankingApp {
             System.out.printf(ERROR_MSG, "Account not found");
         }
 
-        return DASHBOARD; // Return to the dashboard screen
+        return DASHBOARD; 
     }
 
     private static boolean accountExists(String accountNumber) {
